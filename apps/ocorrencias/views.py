@@ -19,6 +19,8 @@ class IsAuthoridade(permissions.BasePermission):
 class OcorrenciaListCreateView(generics.ListCreateAPIView):
     serializer_class = OcorrenciaSerializer
     permission_classes = [permissions.IsAuthenticated]
+    ordering_fields = ['score_prioridade', 'created_at', 'nivel_fogo']
+    ordering = ['-created_at']
 
     def get_queryset(self):
         user = self.request.user
