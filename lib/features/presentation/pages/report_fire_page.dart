@@ -440,11 +440,16 @@ class _ReportFirePageState extends ConsumerState<ReportFirePage> {
               ),
               child: TextField(
                 controller: _descriptionController,
-                maxLines: 4,
+                minLines: 4,
+                maxLines: 6,
+                keyboardType: TextInputType.multiline,
+                textInputAction: TextInputAction.newline,
                 decoration: const InputDecoration(
                   hintText:
                       'Descreva a situação (ex: tamanho das chamas, proximidade de árvores, se há pessoas em perigo)...',
                   border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
                   contentPadding: EdgeInsets.all(16),
                 ),
               ),
