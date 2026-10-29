@@ -99,23 +99,63 @@ python manage.py createsuperuser
 python manage.py runserver 0.0.0.0:8000
 ```
 
-A API estará disponível em `http://localhost:8000/api/`.
+A API estará disponível em `http://localhost:8000/api/v1/`.
 
 ---
 
-## Principais endpoints
+## Documentação interativa (Swagger)
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| `POST` | `/api/accounts/login/` | Login — retorna access e refresh token |
-| `POST` | `/api/accounts/token/refresh/` | Renova o access token |
-| `POST` | `/api/accounts/register/` | Cadastro de novo usuário |
-| `GET` | `/api/accounts/me/` | Dados do usuário autenticado |
-| `GET/POST` | `/api/ocorrencias/` | Listar / criar ocorrências |
-| `GET/PATCH` | `/api/ocorrencias/{id}/` | Detalhe / atualizar status |
-| `GET` | `/api/ocorrencias/{id}/score/` | Score de prioridade da ocorrência |
-| `POST` | `/api/ocorrencias/detectar-duplicata/` | Verificar duplicata por coordenada |
-| `GET/POST` | `/api/alertas/` | Alertas emitidos pelas autoridades |
+| URL | Descrição |
+|-----|-----------|
+| `GET /api/v1/docs/` | Swagger UI — interface gráfica para explorar e testar a API |
+| `GET /api/v1/redoc/` | ReDoc — documentação em formato legível |
+| `GET /api/v1/schema/` | Schema OpenAPI 3.0 em JSON/YAML |
+
+---
+
+## Principais endpoints (`/api/v1/`)
+
+| Método | Endpoint | Auth | Descrição |
+|--------|----------|------|-----------|
+| `POST` | `/accounts/register/` | Público | Cadastro — retorna 201 ou 409 se e-mail já existe |
+| `POST` | `/accounts/login/` | Público | Login — retorna access e refresh token |
+| `POST` | `/accounts/token/refresh/` | Público | Renova o access token |
+| `GET/PATCH` | `/accounts/me/` | Qualquer | Perfil do usuário autenticado |
+| `POST` | `/accounts/logout/` | Qualquer | Invalida o refresh token |
+| `POST` | `/accounts/password-reset/` | Público | Gera nova senha temporária |
+| `GET` | `/accounts/admin/users/` | Admin | Lista todos os usuários |
+| `GET/POST` | `/ocorrencias/` | Qualquer | Listar (paginado, filtro, ordenação) / criar ocorrência |
+| `GET` | `/ocorrencias/?status=pendente&ordering=-score_prioridade` | Qualquer | Filtro e ordenação |
+| `GET/PATCH/DELETE` | `/ocorrencias/{id}/` | GET: qualquer · PATCH/DELETE: autoridade | Detalhe / atualizar / excluir |
+| `GET` | `/ocorrencias/{id}/score/` | Qualquer | Score de prioridade calculado |
+| `POST` | `/ocorrencias/detectar-duplicata/` | Qualquer | Detecta denúncia duplicada por proximidade |
+| `GET/POST` | `/alertas/` | GET: qualquer · POST: autoridade | Alertas de risco ativos |
+| `GET/PATCH/DELETE` | `/alertas/{id}/` | Autoridade | Gerenciar alerta |
+| `GET/POST` | `/verificacoes/` | Qualquer | Verificações de campo |
+| `GET/POST` | `/recursos/` | Qualquer | Recursos de combate (viaturas, pontos d'água) |
+
+> **Nota:** os mesmos endpoints estão disponíveis em `/api/` (sem versão) para compatibilidade retroativa com o app Flutter.
+
+---
+
+## Rodando os testes
+
+```bash
+python manage.py test tests
+```
+
+Os 13 testes cobrem: autenticação, criação/listagem/atualização/exclusão de ocorrências, controle de papéis (cidadão vs autoridade), paginação, filtro por status, score, erro padronizado e 409 por e-mail duplicado.
+
+---
+
+## Inovação — diferencial frente a APIs existentes
+
+| API comparada | O que faz | O que a nossa API faz de diferente |
+|---|---|---|
+| FireBrigade API (genérica) | CRUD de ocorrências | Calcula score de prioridade automaticamente por nível de fogo, proximidade e fumaça |
+| INPE Queimadas | Dados satélite, sem participação cidadã | Denúncias colaborativas em tempo real, com WebSocket e push FCM para autoridades |
+
+Eixos de inovação atendidos: **Regra de negócio** (score automático + detecção de duplicatas geográficas) e **Impacto social** (semiárido piauiense, comunidade local).
 
 ---
 
