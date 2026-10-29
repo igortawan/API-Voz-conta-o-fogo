@@ -161,11 +161,12 @@ class ReportController extends StateNotifier<ReportState> {
         status: AppConstants.statusSent,
       );
 
-      // Versão para Django: não envia userId real para denúncias anônimas
-      // nem para sessões sem conta (anon_* são IDs apenas locais).
+      // Versão para Django: status deve ser 'pendente' (choice válido no servidor);
+      // não envia userId real para denúncias anônimas nem sessões sem conta.
       final isAnonSession = report.userId.startsWith('anon_');
       final djangoReport = localReport.copyWith(
         userId: (report.anonymous || isAnonSession) ? '' : report.userId,
+        status: AppConstants.statusPending,
       );
 
       // Envia ao Django — o servidor calcula score e notifica autoridades via FCM
