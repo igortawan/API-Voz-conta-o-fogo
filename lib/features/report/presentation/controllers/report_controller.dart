@@ -135,7 +135,7 @@ class ReportController extends StateNotifier<ReportState> {
       synced: false,
     );
 
-    final isOnline = await _ref.read(isOnlineProvider.future);
+    final isOnline = await ConnectivityService.isOnline();
 
     if (isOnline) {
       await _submitOnline(report, images);
@@ -170,14 +170,23 @@ class ReportController extends StateNotifier<ReportState> {
 
       // Envia ao Django — o servidor calcula score e notifica autoridades via FCM
       final created = await DjangoReportService.createReport(djangoReport);
-      if (created == null) throw Exception('Falha ao enviar denúncia');
+      if (created == null) {
+        state = state.copyWith(
+          isLoading: false,
+          error: 'Servidor retornou erro. Verifique sua conexão e tente novamente.',
+        );
+        return;
+      }
 
       // Cache local com userId REAL
       await HiveService.saveReport(localReport.toMap());
 
       state = state.copyWith(isLoading: false, success: true, savedOffline: false);
-    } catch (_) {
-      await _saveOffline(report);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Erro ao enviar: ${e.toString().replaceAll('Exception: ', '')}',
+      );
     }
   }
 
