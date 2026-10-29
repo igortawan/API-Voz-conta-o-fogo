@@ -182,3 +182,29 @@ class OcorrenciaTests(TestCase):
         res = self.client.get(f'/api/v1/ocorrencias/{uuid.uuid4()}/')
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(res.data['code'], 'not_found')
+
+    # Teste 14
+    def test_create_ocorrencia_missing_nivel_fogo_returns_400(self):
+        auth(self.client, 'cidadao@test.com')
+        payload = {k: v for k, v in OCORRENCIA_BASE.items() if k != 'nivel_fogo'}
+        res = self.client.post('/api/v1/ocorrencias/', payload, format='json')
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.data['code'], 'bad_request')
+        self.assertIn('nivel_fogo', res.data.get('details', {}))
+
+    # Teste 15
+    def test_ordering_by_score_prioridade(self):
+        Ocorrencia.objects.create(
+            usuario=self.cidadao, latitude='-7.9', longitude='-40.5',
+            nivel_fogo='baixo', score_prioridade=10,
+        )
+        Ocorrencia.objects.create(
+            usuario=self.cidadao, latitude='-7.8', longitude='-40.4',
+            nivel_fogo='critico', score_prioridade=95,
+        )
+        auth(self.client, 'cidadao@test.com')
+        res = self.client.get('/api/v1/ocorrencias/?ordering=-score_prioridade')
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        results = res.data['results']
+        if len(results) >= 2:
+            self.assertGreaterEqual(results[0]['score_prioridade'], results[1]['score_prioridade'])
