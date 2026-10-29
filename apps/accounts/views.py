@@ -43,3 +43,16 @@ class AuthoritiesView(generics.ListAPIView):
 
     def get_queryset(self):
         return Usuario.objects.filter(role='autoridade', is_active=True).exclude(fcm_token='')
+
+
+class AdminUsersView(generics.ListAPIView):
+    """Lista todos os usuários — somente administradores (is_staff=True)."""
+    serializer_class = UsuarioSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+    def get_queryset(self):
+        qs = Usuario.objects.all().order_by('-created_at')
+        role = self.request.query_params.get('role')
+        if role:
+            qs = qs.filter(role=role)
+        return qs
