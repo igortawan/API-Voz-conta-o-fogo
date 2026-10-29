@@ -130,3 +130,14 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ── OpenAPI / Spectacular ──────────────────────────────────────────────────────
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Voz Contra o Fogo API',
+    'DESCRIPTION': (
+        'API RESTful para monitoramento participativo de queimadas no semiárido piauiense. '
+        'Cidadãos registram ocorrências; autoridades recebem alertas em tempo real.'
+    ),
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
