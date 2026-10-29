@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from .models import Usuario
-from .serializers import RegisterSerializer, UsuarioSerializer, UpdateFcmTokenSerializer
+from .serializers import RegisterSerializer, UsuarioSerializer, UpdateFcmTokenSerializer, PasswordResetSerializer
 
 
 class RegisterView(generics.CreateAPIView):
@@ -44,6 +44,30 @@ class AuthoritiesView(generics.ListAPIView):
 
     def get_queryset(self):
         return Usuario.objects.filter(role='autoridade', is_active=True).exclude(fcm_token='')
+
+
+class PasswordResetView(APIView):
+    """Recuperação de senha — gera nova senha temporária e retorna ao usuário."""
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data['email']
+        user = Usuario.objects.get(email=email)
+
+        import secrets, string
+        nova_senha = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(10))
+        user.set_password(nova_senha)
+        user.save(update_fields=['password'])
+
+        response_data = {'detail': 'Nova senha gerada com sucesso.'}
+        from django.conf import settings as dj_settings
+        if dj_settings.DEBUG:
+            response_data['nova_senha'] = nova_senha
+
+        return Response(response_data, status=status.HTTP_200_OK)
 
 
 class LogoutView(APIView):

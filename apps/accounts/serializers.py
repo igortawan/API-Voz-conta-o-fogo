@@ -25,3 +25,12 @@ class UpdateFcmTokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
         fields = ['fcm_token']
+
+
+class PasswordResetSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        if not Usuario.objects.filter(email=value, is_active=True).exists():
+            raise serializers.ValidationError('Nenhuma conta encontrada com este e-mail.')
+        return value
