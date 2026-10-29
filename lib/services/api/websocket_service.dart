@@ -29,15 +29,22 @@ class WebSocketService {
         .replaceFirst('https://', 'wss://')
         .replaceFirst('http://', 'ws://');
 
-    _channel = WebSocketChannel.connect(
-      Uri.parse('$wsUrl/ws/reports/?token=$token'),
-    );
+    try {
+      _channel = WebSocketChannel.connect(
+        Uri.parse('$wsUrl/ws/reports/?token=$token'),
+      );
 
-    _channel!.stream.listen(
-      _onMessage,
-      onDone: _onDisconnect,
-      onError: (_) => _scheduleReconnect(),
-    );
+      await _channel!.ready.catchError((_) {});
+
+      _channel!.stream.listen(
+        _onMessage,
+        onDone: _onDisconnect,
+        onError: (_) => _scheduleReconnect(),
+        cancelOnError: false,
+      );
+    } catch (_) {
+      _scheduleReconnect();
+    }
   }
 
   static void _onMessage(dynamic raw) {
