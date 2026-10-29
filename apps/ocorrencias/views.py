@@ -26,10 +26,14 @@ class OcorrenciaListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        # Autoridade vê todas; cidadão vê só as suas
         if user.role == 'autoridade':
             return Ocorrencia.objects.all()
         return Ocorrencia.objects.filter(usuario=user)
+
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        response['Cache-Control'] = 'private, max-age=30'
+        return response
 
     def perform_create(self, serializer):
         user = self.request.user
