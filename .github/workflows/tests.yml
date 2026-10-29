@@ -1,0 +1,61 @@
+name: Testes da API
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: semiaridofogo_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      SECRET_KEY: ci-secret-key-apenas-para-testes
+      DEBUG: "True"
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/semiaridofogo_test
+      ALLOWED_HOSTS: localhost,127.0.0.1
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Aplicar migrações
+        run: python manage.py migrate --settings=semiaridofogo.settings
+
+      - name: Executar testes com cobertura
+        run: |
+          coverage run --source=apps manage.py test tests --verbosity=2 --settings=semiaridofogo.settings
+          coverage report --fail-under=70
+          coverage xml -o coverage.xml
+
+      - name: Publicar relatório de cobertura
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage.xml
