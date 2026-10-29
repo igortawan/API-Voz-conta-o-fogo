@@ -13,6 +13,12 @@ class RegisterView(generics.CreateAPIView):
     permission_classes = [permissions.AllowAny]
 
     def create(self, request, *args, **kwargs):
+        email = request.data.get('email', '')
+        if Usuario.objects.filter(email=email).exists():
+            return Response(
+                {'code': 'email_conflict', 'message': 'Este e-mail já está cadastrado.', 'details': {}},
+                status=status.HTTP_409_CONFLICT,
+            )
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()

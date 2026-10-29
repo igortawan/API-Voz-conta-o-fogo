@@ -68,11 +68,11 @@ class OcorrenciaListCreateView(generics.ListCreateAPIView):
             )
 
 
-class OcorrenciaDetailView(generics.RetrieveUpdateAPIView):
+class OcorrenciaDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Ocorrencia.objects.all()
 
     def get_permissions(self):
-        if self.request.method in ['PUT', 'PATCH']:
+        if self.request.method in ['PUT', 'PATCH', 'DELETE']:
             return [IsAuthoridade()]
         return [permissions.IsAuthenticated()]
 
@@ -83,7 +83,6 @@ class OcorrenciaDetailView(generics.RetrieveUpdateAPIView):
 
     def perform_update(self, serializer):
         ocorrencia = serializer.save()
-        # Notifica o cidadão que fez a denúncia via WebSocket (só se Channels estiver configurado)
         channel_layer = get_channel_layer()
         if ocorrencia.usuario and channel_layer is not None:
             async_to_sync(channel_layer.group_send)(
@@ -93,6 +92,11 @@ class OcorrenciaDetailView(generics.RetrieveUpdateAPIView):
                     'ocorrencia': OcorrenciaSerializer(ocorrencia).data,
                 }
             )
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(['GET'])
