@@ -2,6 +2,7 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
 from .models import Usuario
 from .serializers import RegisterSerializer, UsuarioSerializer, UpdateFcmTokenSerializer
 
@@ -43,6 +44,22 @@ class AuthoritiesView(generics.ListAPIView):
 
     def get_queryset(self):
         return Usuario.objects.filter(role='autoridade', is_active=True).exclude(fcm_token='')
+
+
+class LogoutView(APIView):
+    """Invalida o refresh token, impedindo renovação futura do access token."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        refresh_token = request.data.get('refresh')
+        if not refresh_token:
+            return Response({'detail': 'Refresh token obrigatório.'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response({'detail': 'Logout realizado com sucesso.'}, status=status.HTTP_200_OK)
+        except TokenError:
+            return Response({'detail': 'Token inválido ou já expirado.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class AdminUsersView(generics.ListAPIView):
