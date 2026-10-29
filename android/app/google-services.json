@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1084562950869",
+    "project_id": "voz-contra-o-fogo",
+    "storage_bucket": "voz-contra-o-fogo.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1084562950869:android:ad38a667820f601c37305c",
+        "android_client_info": {
+          "package_name": "com.example.voz_contra_o_fogo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB13bJukRLleWGMmh1Mb2ATy8KCByr5tgs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

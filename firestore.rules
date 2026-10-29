@@ -1,0 +1,87 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Funções auxiliares ────────────────────────────────────────────────
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isValidReport() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['latitude', 'longitude', 'description', 'status'])
+        && data.latitude is number
+        && data.longitude is number
+        && data.description is string
+        && data.description.size() > 0
+        && data.description.size() <= 2000;
+    }
+
+    // ── Denúncias (reports) ──────────────────────────────────────────────
+
+    match /reports/{reportId} {
+      // Qualquer um pode criar denúncia (inclusive anônimo com auth Firebase)
+      allow create: if isAuthenticated() && isValidReport();
+
+      // Dono pode ler sua própria denúncia
+      allow read: if isAuthenticated() &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+
+      // Apenas admins podem atualizar status
+      allow update: if isAdmin() ||
+        (isOwner(resource.data.userId) &&
+          !request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(['status', 'respondedBy']));
+
+      // Apenas admins podem excluir
+      allow delete: if isAdmin();
+    }
+
+    // ── Usuários ──────────────────────────────────────────────────────────
+
+    match /users/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    // ── Admins ────────────────────────────────────────────────────────────
+
+    match /admins/{adminId} {
+      allow read: if isAdmin() || isOwner(adminId);
+      allow write: if false; // Apenas via Firebase Console / Cloud Functions
+    }
+
+    // ── Notificações ──────────────────────────────────────────────────────
+
+    match /notifications/{notifId} {
+      allow read: if isAuthenticated() &&
+        (resource.data.targetUserId == request.auth.uid || isAdmin());
+      allow create: if isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
+    // ── Logs ──────────────────────────────────────────────────────────────
+
+    match /logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated();
+      allow update, delete: if false;
+    }
+
+    // ── Regiões ───────────────────────────────────────────────────────────
+
+    match /regions/{regionId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

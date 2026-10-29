@@ -1,0 +1,42 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return request.auth != null &&
+        firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid));
+    }
+
+    function isValidImage() {
+      return request.resource.contentType.matches('image/.*')
+        && request.resource.size < 10 * 1024 * 1024; // Max 10MB
+    }
+
+    // ── Imagens de denúncias ─────────────────────────────────────────────
+
+    match /report_images/{reportId}/{imageId} {
+      // Qualquer usuário autenticado pode fazer upload
+      allow write: if isAuthenticated() && isValidImage();
+
+      // Qualquer usuário autenticado pode ler (para visualizar no app)
+      allow read: if isAuthenticated();
+
+      // Apenas admins podem excluir
+      allow delete: if isAdmin();
+    }
+
+    // ── Fotos de perfil ──────────────────────────────────────────────────
+
+    match /profile_images/{userId}/{imageId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated()
+        && request.auth.uid == userId
+        && isValidImage();
+      allow delete: if isAuthenticated() && request.auth.uid == userId;
+    }
+  }
+}

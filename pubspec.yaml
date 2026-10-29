@@ -1,0 +1,108 @@
+name: voz_contra_o_fogo
+description: "Aplicativo de denúncia de focos de incêndio e queimadas."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Firebase — mantido APENAS para receber push notifications (FCM)
+  # firebase_auth e cloud_firestore foram removidos; auth e dados vão para a API Django
+  firebase_core: ^3.6.0
+  firebase_messaging: ^15.1.3
+
+  # Autenticação e armazenamento seguro de tokens JWT
+  flutter_secure_storage: ^9.2.2
+
+  # WebSocket — tempo real substituindo Firestore streams
+  web_socket_channel: ^3.0.1
+
+  # State Management
+  flutter_riverpod: ^2.5.1
+
+  # Local Storage (Offline-First)
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
+  # Maps & Location
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+  geolocator: ^13.0.1
+  geocoding: ^3.0.0
+
+  # HTTP
+  http: ^1.2.2
+  googleapis_auth: ^1.6.0
+
+  # Image
+  image_picker: ^1.1.2
+  flutter_image_compress: ^2.3.0
+  cached_network_image: ^3.4.1
+
+  # Background & Notifications
+  workmanager: ^0.9.0
+  flutter_local_notifications: ^17.2.2
+
+  # Network
+  connectivity_plus: ^6.0.3
+
+  # Utilities
+  intl: ^0.19.0
+  uuid: ^4.4.2
+  path_provider: ^2.1.4
+  permission_handler: ^11.3.1
+  url_launcher: ^6.3.0
+  shimmer: ^3.0.0
+  flutter_animate: ^4.5.0
+
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.12
+  flutter_launcher_icons: ^0.14.1
+  flutter_native_splash: ^2.4.1
+
+# ── Ícone do app ─────────────────────────────────────────────────────────────
+# Coloque o arquivo em assets/icons/icon.png (PNG quadrado, mínimo 1024×1024 px)
+# Depois rode: dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: "ic_launcher"
+  ios: true
+  image_path: "assets/icons/icon.png"
+  min_sdk_android: 21
+  # Ícone adaptativo Android (fundo verde + ícone em foreground)
+  adaptive_icon_background: "#1B7A1B"
+  adaptive_icon_foreground: "assets/icons/icon_foreground.png"
+  web:
+    generate: false
+
+# ── Splash nativo ─────────────────────────────────────────────────────────────
+# Rode: dart run flutter_native_splash:create
+flutter_native_splash:
+  # Fundo verde igual ao SplashPage do Flutter → transição suave
+  color: "#1B7A1B"
+  color_dark: "#1B7A1B"
+  # Ícone centralizado (use o mesmo PNG branco do ícone, ou deixe só a cor)
+  image: "assets/icons/splash_logo.png"
+  image_dark: "assets/icons/splash_logo.png"
+  # Android 12+ (suporte a splash animado)
+  android_12:
+    image: "assets/icons/splash_logo.png"
+    icon_background_color: "#1B7A1B"
+    icon_background_color_dark: "#1B7A1B"
+  fullscreen: false
+  web: false
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/
