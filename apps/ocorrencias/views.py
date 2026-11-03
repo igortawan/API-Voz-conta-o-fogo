@@ -131,7 +131,7 @@ def score_view(request, pk):
 
 
 @api_view(['POST'])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([permissions.AllowAny])
 def duplicata_view(request):
     serializer = DuplicataCheckSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)

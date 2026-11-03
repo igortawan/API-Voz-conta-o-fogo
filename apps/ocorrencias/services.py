@@ -52,22 +52,20 @@ def _similaridade_texto(a: str, b: str) -> float:
 
 def detectar_duplicata(latitude: float, longitude: float, titulo: str,
                        raio_km: float = 0.5, horas: int = 24) -> dict:
+    """Detecção puramente geográfica: qualquer denúncia dentro do raio nas
+    últimas `horas` é considerada duplicata, independentemente do autor."""
     from .models import Ocorrencia
     desde = timezone.now() - timedelta(hours=horas)
     recentes = Ocorrencia.objects.filter(created_at__gte=desde)
 
-    melhor_confianca = 0.0
-    for oc in recentes:
-        dist = _haversine_km(latitude, longitude, float(oc.latitude), float(oc.longitude))
-        if dist > raio_km:
-            continue
-        sim_texto = _similaridade_texto(titulo, oc.descricao[:50])
-        # Distância mais próxima = maior peso; texto complementar
-        geo_score = max(0, 1 - (dist / raio_km))
-        confianca = (geo_score * 0.7) + (sim_texto * 0.3)
-        melhor_confianca = max(melhor_confianca, confianca)
+    proximas = [
+        oc for oc in recentes
+        if _haversine_km(latitude, longitude, float(oc.latitude), float(oc.longitude)) <= raio_km
+    ]
 
+    total = len(proximas)
     return {
-        'is_duplicate': melhor_confianca >= 0.7,
-        'confianca': round(melhor_confianca, 2),
+        'is_duplicate': total > 0,
+        'total_denuncias_proximas': total,
+        'confianca': 1.0 if total > 0 else 0.0,
     }
