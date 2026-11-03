@@ -15,9 +15,13 @@ class Command(BaseCommand):
             self.stdout.write('ADMIN_EMAIL ou ADMIN_PASSWORD não definidos — pulando.')
             return
 
-        if User.objects.filter(email=email).exists():
-            self.stdout.write(f'Admin {email} já existe — pulando.')
-            return
-
-        User.objects.create_superuser(email=email, password=password, nome='Admin')
-        self.stdout.write(self.style.SUCCESS(f'Superusuário {email} criado com sucesso.'))
+        user, created = User.objects.get_or_create(
+            email=email,
+            defaults={'nome': 'Admin', 'is_staff': True, 'is_superuser': True, 'role': 'autoridade'},
+        )
+        user.set_password(password)
+        user.is_staff = True
+        user.is_superuser = True
+        user.save()
+        action = 'criado' if created else 'senha atualizada'
+        self.stdout.write(self.style.SUCCESS(f'Admin {email} — {action} com sucesso.'))
