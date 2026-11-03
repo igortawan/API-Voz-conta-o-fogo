@@ -3,7 +3,7 @@ from .models import Alerta
 from .serializers import AlertaSerializer
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-from apps.notifications.fcm import enviar_para_todos
+from apps.notifications.fcm_v1 import enviar_para_todos
 
 
 class IsAuthoridade(permissions.BasePermission):

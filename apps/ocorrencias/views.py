@@ -8,7 +8,7 @@ import json
 from .models import Ocorrencia
 from .serializers import OcorrenciaSerializer, OcorrenciaUpdateSerializer, DuplicataCheckSerializer
 from .services import calcular_score, detectar_duplicata
-from apps.notifications.fcm import enviar_para_autoridades
+from apps.notifications.fcm_v1 import enviar_para_autoridades
 
 
 class IsAuthoridade(permissions.BasePermission):

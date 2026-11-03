@@ -8,6 +8,8 @@ daphne==4.1.2
 psycopg2-binary==2.9.9
 python-decouple==3.8
 pyfcm==2.0.7
+google-auth==2.35.0
+requests==2.32.3
 cloudinary==1.40.0
 Pillow==10.4.0
 django-filter==24.3

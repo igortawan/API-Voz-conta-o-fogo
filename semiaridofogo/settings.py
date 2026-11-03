@@ -118,6 +118,7 @@ else:
 
 # ── FCM ────────────────────────────────────────────────────────────────────────
 FCM_SERVER_KEY = config('FCM_SERVER_KEY', default='')
+FIREBASE_SERVICE_ACCOUNT_JSON = config('FIREBASE_SERVICE_ACCOUNT_JSON', default='')
 
 # ── Cloudinary ─────────────────────────────────────────────────────────────────
 CLOUDINARY_CLOUD_NAME = config('CLOUDINARY_CLOUD_NAME', default='')
