@@ -18,14 +18,22 @@ class IsAuthoridade(permissions.BasePermission):
 
 class OcorrenciaListCreateView(generics.ListCreateAPIView):
     serializer_class = OcorrenciaSerializer
-    permission_classes = [permissions.IsAuthenticated]
     filterset_fields = ['status', 'nivel_fogo']
     search_fields = ['descricao', 'endereco']
     ordering_fields = ['score_prioridade', 'created_at', 'nivel_fogo']
     ordering = ['-created_at']
 
+    def get_permissions(self):
+        # Qualquer pessoa pode registrar uma denúncia (inclusive anônimos sem JWT)
+        # A listagem ainda exige autenticação
+        if self.request.method == 'POST':
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
+
     def get_queryset(self):
         user = self.request.user
+        if not user.is_authenticated:
+            return Ocorrencia.objects.none()
         if user.role == 'autoridade':
             return Ocorrencia.objects.all()
         return Ocorrencia.objects.filter(usuario=user)
@@ -48,8 +56,10 @@ class OcorrenciaListCreateView(generics.ListCreateAPIView):
             longitude=float(data.get('longitude', 0)),
         )
 
+        # Denúncias anônimas ou de sessões sem conta ficam sem usuário vinculado
+        save_user = None if (data.get('anonima') or not user.is_authenticated) else user
         ocorrencia = serializer.save(
-            usuario=None if data.get('anonima') else user,
+            usuario=save_user,
             score_prioridade=score_data['score'],
         )
 
