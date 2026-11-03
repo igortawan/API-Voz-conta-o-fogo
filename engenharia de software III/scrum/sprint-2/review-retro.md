@@ -46,14 +46,17 @@
 
 ### As 3 perguntas obrigatórias da Retrospectiva
 
-**1. O que a equipe fez bem nesta sprint?**  
-A equipe manteve o ritmo consistente: nenhum dia terminou com o burndown acima do planejado. A adoção do TDD reduziu o tempo de debug em H08 e H05 — os testes escritos antes já documentavam o comportamento esperado, facilitando a revisão de código.
+**1. A velocidade da Sprint 2 foi maior que a da Sprint 1? Por quê?**  
+Sim. A velocidade subiu de 15 pontos (Sprint 1) para 21 pontos (Sprint 2) — aumento de 40%. Os dois fatores principais foram: (a) a equipe já conhecia o código e o ambiente, eliminando o overhead de setup que existiu na Sprint 1; e (b) a adoção do TDD reduziu o tempo de debug — ao escrever o teste antes do código, o comportamento esperado já estava claro, e o ciclo de red→green foi mais direto do que a abordagem de "implementa e depois testa" da Sprint 1.
 
-**2. O que pode melhorar para a próxima sprint ou projeto?**  
-O burndown foi atualizado de forma irregular (acumulado no final do dia em vez de ao longo do dia). Embora não tenha impactado a entrega, criou momentos de incerteza sobre o progresso real. A melhoria é simples: atualizar o burndown ao completar cada tarefa, não ao final do dia.
+**2. Qual história ficou incompleta? Que critério de aceitação ou item da DoD faltou?**  
+H06 (Detecção de duplicatas geográficas) ficou incompleta e permanece no backlog. O critério de aceitação não atendido foi: *"Dado que já existe uma ocorrência a menos de 500m, quando um segundo cidadão reporta outra ocorrência no mesmo raio, então o endpoint `/detectar-duplicata/` retorna `is_duplicata=true` com referência ao ID original."* A história não entrou na Sprint 2 porque a estimativa de 5 pontos, combinada com as 5 histórias já planejadas (21 pontos), excederia a capacidade da equipe. O item do DoD que teria sido exigido e não foi verificado é o item 2: *"cobertura ≥ 70% após a adição da funcionalidade"* — a lógica de raio geográfico adicionaria complexidade ao `services.py` que demandaria testes de integração extras para manter a cobertura.
 
-**3. Qual ação concreta a equipe se compromete a adotar imediatamente?**  
-Adicionar o badge do CI ao README e incluir o DoD checklist no template de PR — duas mudanças de 5 minutos que tornam a "Pronto" visível sem precisar perguntar ao Scrum Master.
+**3. A melhoria adotada na Retro 1 (TDD) funcionou? Evidência nos commits.**  
+Sim. A melhoria foi: *"adotar TDD a partir do dia 1 da Sprint 2"*. Evidência nos commits:  
+- [`b4cdd48`](https://github.com/igortawan/API-Voz-conta-o-fogo/commit/b4cdd48): mensagem `test(ci): adicionar pipeline GitHub Actions e elevar suite para 15 testes` — os testes 14 e 15 (TDD) foram o gatilho para o CI pipeline ser configurado, não o contrário.  
+- Histórico da Daily 3 (01/11): *"H08 testes escritos ANTES da view"* — o teste estava no repositório antes do commit da implementação, comprovando o ciclo Red (teste falhando) → Green (implementação mínima) → Refactor.  
+- Zero regressões no sprint 2: todos os 15 testes passaram em cada push, sem rollback.
 
 ---
 

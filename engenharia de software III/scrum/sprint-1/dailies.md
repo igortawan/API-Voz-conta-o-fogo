@@ -1,6 +1,8 @@
 # Sprint 1 — Daily Scrums e Burndown
 
-**Período:** 29/10/2026 a 03/11/2026
+**Período:** 29/10/2026 a 03/11/2026  
+**Formato:** Síncrono via WhatsApp — todos os dias úteis às **16h**  
+**Duração:** 15 minutos (3 perguntas: fiz / farei / impedimento)
 
 ---
 
@@ -9,7 +11,7 @@
 | Integrante | O que fiz | O que farei | Impedimento |
 |---|---|---|---|
 | Igor Tawan | Sprint Planning realizada; estrutura do repositório organizada; iniciou implementação de H12 (versionamento `/api/v1/`) | Finalizar H12 e iniciar H01 (cadastro de usuário) | Nenhum |
-| [Integrante 2] | Sprint Planning; revisão dos modelos de Ocorrencia e Usuario | Iniciar H03 (model + serializer + view de criação) | Nenhum |
+| Icaro Thaynan | Sprint Planning; revisão dos modelos de Ocorrencia e Usuario | Iniciar H03 (model + serializer + view de criação) | Nenhum |
 
 **Burndown:** 15 pontos restantes
 
@@ -20,10 +22,10 @@
 | Integrante | O que fiz | O que farei | Impedimento |
 |---|---|---|---|
 | Igor Tawan | H12 concluída (versionamento e Cache-Control); H01 implementada e testes passando; PR aberto e revisado | Implementar H02 (login/refresh) | Nenhum |
-| [Integrante 2] | H03: model e serializer criados; view de criação funcionando nos testes manuais | Escrever testes automatizados para H03 e abrir PR | Dúvida sobre o campo `score_prioridade` — resolvida na Daily |
+| Icaro Thaynan | H03: model e serializer criados; view de criação funcionando nos testes manuais | Escrever testes automatizados para H03 e abrir PR | Dúvida sobre o campo `score_prioridade` — resolvida na Daily |
 
 **Burndown:** 9 pontos restantes  
-*Impedimento registrado: dúvida sobre score_prioridade → resolvida por Igor Tawan durante a Daily (responsável: Scrum Master [Integrante 2])*
+*Impedimento registrado: dúvida sobre score_prioridade → resolvida por Igor Tawan durante a Daily (responsável: Scrum Master Icaro Thaynan)*
 
 ---
 
@@ -32,7 +34,7 @@
 | Integrante | O que fiz | O que farei | Impedimento |
 |---|---|---|---|
 | Igor Tawan | H02 implementada (login + refresh + logout); PR revisado e mergeado | Revisar PR de H03 e iniciar H04 (paginação) | Nenhum |
-| [Integrante 2] | H03 testes escritos (5 cenários); PR aberto aguardando revisão | Após revisão de H03, iniciar contribuição em H04 | PR aguardando revisor |
+| Icaro Thaynan | H03 testes escritos (5 cenários); PR aberto aguardando revisão | Após revisão de H03, iniciar contribuição em H04 | PR aguardando revisor |
 
 **Burndown:** 5 pontos restantes
 
@@ -43,7 +45,7 @@
 | Integrante | O que fiz | O que farei | Impedimento |
 |---|---|---|---|
 | Igor Tawan | H04 implementada (paginação, filtro, ordenação); todos os testes passando no CI | Preparar Sprint Review; demonstrar via Swagger | Nenhum |
-| [Integrante 2] | Revisou PR de H04; corrigiu bug no filtro por status | Participar da Review e Retrospectiva | Nenhum |
+| Icaro Thaynan | Revisou PR de H04; corrigiu bug no filtro por status | Participar da Review e Retrospectiva | Nenhum |
 
 **Burndown:** 0 pontos restantes — todas as histórias da Sprint 1 estão **Prontas**
 
