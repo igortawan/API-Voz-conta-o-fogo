@@ -98,9 +98,10 @@ class AuthApiService {
         Uri.parse('$_base/accounts/token/refresh/'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'refresh': refresh}),
-      ).timeout(const Duration(seconds: 10));
+      ).timeout(const Duration(seconds: 30));
 
       if (res.statusCode != 200) {
+        // Token inválido ou expirado no servidor — logout real
         await logout();
         return false;
       }
@@ -111,6 +112,7 @@ class AuthApiService {
       }
       return true;
     } catch (_) {
+      // Timeout ou erro de rede — NÃO faz logout; tokens permanecem para próxima tentativa
       return false;
     }
   }

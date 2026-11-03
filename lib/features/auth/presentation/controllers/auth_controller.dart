@@ -120,7 +120,8 @@ class AuthController extends StateNotifier<AsyncValue<AppUser?>> {
     // Tenta refresh em background para renovar o access token
     final ok = await AuthApiService.refreshToken();
     if (!ok) {
-      await AuthApiService.logout();
+      // refreshToken() já chama logout() quando o servidor rejeita o token.
+      // Se foi timeout/rede offline, mantemos os tokens para próxima tentativa.
       return null;
     }
 
