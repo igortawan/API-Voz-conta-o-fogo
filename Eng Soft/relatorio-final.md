@@ -3,7 +3,7 @@
 **Projeto:** Voz Contra o Fogo — API REST de monitoramento de queimadas  
 **Versão:** 1.0  
 **Data:** 2026-11-03  
-**Equipe:** Igor Tawan Alves dos Santos, Breno Vasconcelos, Jhonatan Mesquita  
+**Equipe:** Igor Tawan, Leonardo Arrais, Icaro Thaynan  
 **Orientador:** Prof. Dr. (IFPI Paulistana-PI)  
 **Documento:** Encerramento do ciclo de testes — Atividade Processo de Testes na API
 
@@ -114,11 +114,11 @@ O único defeito em aberto (DEF-004 — cobertura 68%) é de severidade BAIXA e 
 | # | Ação                                                  | Responsável   | Prazo       |
 |---|-------------------------------------------------------|---------------|-------------|
 | 1 | Adicionar testes para WebSocket consumers             | Igor Tawan    | Sprint 3    |
-| 2 | Mock do cliente FCM nos testes                        | Breno / Jhonatan | Sprint 3  |
+| 2 | Mock do cliente FCM nos testes                        | Leonardo / Icaro | Sprint 3  |
 | 3 | Teste de carga com locust (100 usuários, 60s)         | Igor Tawan    | Sprint 3    |
 | 4 | Validação dos critérios de aceitação com parceiros    | Equipe        | Após deploy |
-| 5 | Adicionar CT-19 e CT-20 (valor limite de coordenadas) | Breno         | Sprint 3    |
+| 5 | Adicionar CT-19 e CT-20 (valor limite de coordenadas) | Leonardo      | Sprint 3    |
 
 ---
 
-_Relatório preparado em 2026-11-03 por Igor Tawan Alves dos Santos — Iniciação Científica IFPI Paulistana-PI / Projeto Voz Contra o Fogo_
+_Relatório preparado em 2026-11-03 por Igor Tawan — Iniciação Científica IFPI Paulistana-PI / Projeto Voz Contra o Fogo_

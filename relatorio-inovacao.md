@@ -1,7 +1,7 @@
 # Relatório de Inovação — Voz Contra o Fogo
 
 **Projeto:** API REST de Monitoramento Participativo de Queimadas  
-**Equipe:** Igor Tawan Alves dos Santos, Breno Vasconcelos, Jhonatan Mesquita  
+**Equipe:** Igor Tawan, Leonardo Arrais, Icaro Thaynan  
 **Instituição:** IFPI Campus Paulistana — Iniciação Científica / FAPEPI  
 **Data:** 2026-11-03
 

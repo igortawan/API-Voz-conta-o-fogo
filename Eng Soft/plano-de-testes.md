@@ -4,7 +4,7 @@
 **Data:** 2026-11-03  
 **Projeto:** Voz Contra o Fogo — Sistema de monitoramento de queimadas no semiárido piauiense  
 **Repositório:** semiaridofogo-django  
-**Responsável:** Igor Tawan Alves dos Santos  
+**Responsável:** Igor Tawan  
 **Orientador:** Prof. Dr. (IFPI Paulistana-PI)
 
 ---
@@ -120,7 +120,7 @@
 | Papel                  | Responsável                     | Atividades                                          |
 |------------------------|----------------------------------|-----------------------------------------------------|
 | Líder de testes        | Igor Tawan                       | Plano, execução, relatório final                    |
-| Desenvolvedor/testador | Breno Vasconcelos, Jhonatan Mesquita | Escrita de casos e execução                     |
+| Desenvolvedor/testador | Leonardo Arrais, Icaro Thaynan       | Escrita de casos e execução                     |
 | Revisor de PR          | Integrante que não codificou     | Revisão de código + validação dos testes            |
 | Orientador             | Prof. Dr. (IFPI)                 | Validação dos critérios de aceitação                |
 

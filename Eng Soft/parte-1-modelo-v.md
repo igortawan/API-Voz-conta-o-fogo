@@ -2,7 +2,7 @@
 
 **Projeto:** Voz Contra o Fogo — API REST de monitoramento de queimadas  
 **Disciplina:** Engenharia de Software  
-**Equipe:** Igor Tawan, Breno Vasconcelos, Jhonatan Mesquita
+**Equipe:** Igor Tawan, Leonardo Arrais, Icaro Thaynan
 
 ---
 
