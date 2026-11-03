@@ -22,6 +22,7 @@ class OcorrenciaListCreateView(generics.ListCreateAPIView):
     search_fields = ['descricao', 'endereco']
     ordering_fields = ['score_prioridade', 'created_at', 'nivel_fogo']
     ordering = ['-created_at']
+    pagination_class = None
 
     def get_permissions(self):
         # Qualquer pessoa pode registrar uma denúncia (inclusive anônimos sem JWT)

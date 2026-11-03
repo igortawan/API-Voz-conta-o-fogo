@@ -13,6 +13,7 @@ class IsAuthoridade(permissions.BasePermission):
 
 class AlertaListCreateView(generics.ListCreateAPIView):
     serializer_class = AlertaSerializer
+    pagination_class = None
 
     def get_queryset(self):
         # Autoridade vê todos os alertas (histórico); demais veem apenas os ativos
