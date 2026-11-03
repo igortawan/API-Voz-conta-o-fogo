@@ -1,0 +1,459 @@
+{
+  "info": {
+    "name": "Voz Contra o Fogo — API",
+    "description": "Coleção completa dos endpoints da API REST de monitoramento de queimadas (IFPI Paulistana / FAPEPI). Inclui autenticação JWT, ocorrências, alertas, verificações e recursos.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000/api/v1", "type": "string" },
+    { "key": "access_token", "value": "", "type": "string" },
+    { "key": "refresh_token", "value": "", "type": "string" },
+    { "key": "ocorrencia_id", "value": "1", "type": "string" },
+    { "key": "alerta_id", "value": "1", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Autenticação",
+      "item": [
+        {
+          "name": "Registrar usuário (cidadão)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/accounts/register/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"cidadao@exemplo.com\",\n  \"password\": \"Senha@123\",\n  \"name\": \"João Cidadão\",\n  \"role\": \"cidadao\"\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"id\": 1,\n  \"email\": \"cidadao@exemplo.com\",\n  \"access\": \"<jwt_access>\",\n  \"refresh\": \"<jwt_refresh>\"\n}"
+            },
+            {
+              "name": "409 Conflict — e-mail já cadastrado",
+              "status": "Conflict",
+              "code": 409,
+              "body": "{\n  \"code\": \"email_already_exists\",\n  \"detail\": \"E-mail já cadastrado.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Registrar usuário (autoridade)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/accounts/register/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"autoridade@ibama.gov.br\",\n  \"password\": \"Senha@456\",\n  \"name\": \"Maria Autoridade\",\n  \"role\": \"autoridade\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('access_token', json.access);",
+                  "pm.collectionVariables.set('refresh_token', json.refresh);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/accounts/login/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"cidadao@exemplo.com\",\n  \"password\": \"Senha@123\"\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"access\": \"<jwt_access>\",\n  \"refresh\": \"<jwt_refresh>\"\n}"
+            },
+            {
+              "name": "401 Unauthorized — credenciais inválidas",
+              "status": "Unauthorized",
+              "code": 401,
+              "body": "{\n  \"code\": \"unauthorized\",\n  \"detail\": \"Credenciais inválidas.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Renovar access token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/accounts/token/refresh/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Perfil do usuário logado",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/accounts/me/"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"id\": 1,\n  \"email\": \"cidadao@exemplo.com\",\n  \"name\": \"João Cidadão\",\n  \"role\": \"cidadao\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": "{{base_url}}/accounts/logout/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Ocorrências",
+      "item": [
+        {
+          "name": "Listar ocorrências (paginado)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/ocorrencias/?page=1&page_size=10",
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "page_size", "value": "10" }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"count\": 25,\n  \"next\": \"http://localhost:8000/api/v1/ocorrencias/?page=2\",\n  \"previous\": null,\n  \"results\": []\n}"
+            },
+            {
+              "name": "401 — sem token",
+              "status": "Unauthorized",
+              "code": 401,
+              "body": "{\n  \"code\": \"unauthorized\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Listar por status e ordenado por score",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/ocorrencias/?status=pendente&ordering=-score_prioridade",
+              "query": [
+                { "key": "status", "value": "pendente" },
+                { "key": "ordering", "value": "-score_prioridade" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar ocorrência",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  var json = pm.response.json();",
+                  "  pm.collectionVariables.set('ocorrencia_id', json.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": "{{base_url}}/ocorrencias/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descricao\": \"Incêndio próximo à fazenda Serra Verde\",\n  \"nivel_fogo\": \"alto\",\n  \"ha_fumaca\": true,\n  \"proximo_residencia\": true,\n  \"latitude\": \"-8.1234\",\n  \"longitude\": \"-41.5678\",\n  \"endereco\": \"Zona Rural, Paulistana-PI\",\n  \"anonima\": false\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"id\": 1,\n  \"descricao\": \"Incêndio próximo à fazenda Serra Verde\",\n  \"nivel_fogo\": \"alto\",\n  \"score_prioridade\": 72,\n  \"status\": \"pendente\",\n  \"created_at\": \"2026-11-03T10:00:00Z\"\n}"
+            },
+            {
+              "name": "400 — nivel_fogo ausente",
+              "status": "Bad Request",
+              "code": 400,
+              "body": "{\n  \"code\": \"bad_request\",\n  \"detail\": {\"nivel_fogo\": [\"Este campo é obrigatório.\"]}\n}"
+            }
+          ]
+        },
+        {
+          "name": "Detalhe de ocorrência",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/ocorrencias/{{ocorrencia_id}}/"
+          },
+          "response": [
+            {
+              "name": "404 — não encontrada",
+              "status": "Not Found",
+              "code": 404,
+              "body": "{\n  \"code\": \"not_found\",\n  \"detail\": \"Não encontrado.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Atualizar status (autoridade)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": "{{base_url}}/ocorrencias/{{ocorrencia_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"em_analise\"\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "403 — cidadão tentando atualizar",
+              "status": "Forbidden",
+              "code": 403,
+              "body": "{\n  \"code\": \"forbidden\",\n  \"detail\": \"Você não tem permissão para realizar esta ação.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Excluir ocorrência (autoridade)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/ocorrencias/{{ocorrencia_id}}/"
+          },
+          "response": [
+            {
+              "name": "204 No Content",
+              "status": "No Content",
+              "code": 204,
+              "body": ""
+            }
+          ]
+        },
+        {
+          "name": "Score de prioridade",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/ocorrencias/{{ocorrencia_id}}/score/"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"score\": 72,\n  \"nivel_calculado\": \"alto\",\n  \"recomendacao\": \"Acionamento imediato de brigada\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Detectar duplicata",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": "{{base_url}}/ocorrencias/detectar-duplicata/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": \"-8.1235\",\n  \"longitude\": \"-41.5679\",\n  \"raio_metros\": 500\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK — duplicata encontrada",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"duplicata\": true,\n  \"ocorrencia_id\": 1,\n  \"distancia_metros\": 14.2\n}"
+            },
+            {
+              "name": "200 OK — sem duplicata",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"duplicata\": false\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Alertas",
+      "item": [
+        {
+          "name": "Listar alertas",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/alertas/"
+          },
+          "response": []
+        },
+        {
+          "name": "Criar alerta (autoridade)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  var json = pm.response.json();",
+                  "  pm.collectionVariables.set('alerta_id', json.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": "{{base_url}}/alertas/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Alerta de queimada — Zona Norte\",\n  \"descricao\": \"Foco ativo detectado próximo à BR-407\",\n  \"nivel_risco\": \"alto\",\n  \"latitude\": \"-8.1234\",\n  \"longitude\": \"-41.5678\"\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"id\": 1,\n  \"titulo\": \"Alerta de queimada — Zona Norte\",\n  \"nivel_risco\": \"alto\",\n  \"created_at\": \"2026-11-03T10:05:00Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Detalhe / atualizar / excluir alerta",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": "{{base_url}}/alertas/{{alerta_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nivel_risco\": \"critico\"\n}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Verificações",
+      "item": [
+        {
+          "name": "Listar verificações",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/verificacoes/"
+          },
+          "response": []
+        },
+        {
+          "name": "Criar verificação de campo",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": "{{base_url}}/verificacoes/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ocorrencia\": {{ocorrencia_id}},\n  \"descricao\": \"Verificação in loco — foco controlado\",\n  \"resultado\": \"confirmado\"\n}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Recursos",
+      "item": [
+        {
+          "name": "Listar recursos de combate",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/recursos/"
+          },
+          "response": []
+        },
+        {
+          "name": "Cadastrar recurso",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": "{{base_url}}/recursos/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Caminhão Pipa 01\",\n  \"tipo\": \"veiculo\",\n  \"latitude\": \"-8.1500\",\n  \"longitude\": \"-41.5800\",\n  \"disponivel\": true\n}"
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
