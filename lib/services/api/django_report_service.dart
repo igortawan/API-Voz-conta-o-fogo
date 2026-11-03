@@ -21,7 +21,8 @@ class DjangoReportService {
     if (res.statusCode != 200) {
       throw Exception('Erro ${res.statusCode} ao carregar denúncias');
     }
-    final List data = jsonDecode(utf8.decode(res.bodyBytes));
+    final decoded = jsonDecode(utf8.decode(res.bodyBytes));
+    final List data = decoded is Map ? (decoded['results'] as List? ?? []) : decoded as List;
     return data.map((m) => ReportModel.fromDjangoMap(m as Map<String, dynamic>)).toList();
   }
 
@@ -140,7 +141,8 @@ class DjangoReportService {
     if (res.statusCode != 200) {
       throw Exception('Erro ${res.statusCode} ao carregar alertas');
     }
-    final List data = jsonDecode(utf8.decode(res.bodyBytes));
+    final decoded = jsonDecode(utf8.decode(res.bodyBytes));
+    final List data = decoded is Map ? (decoded['results'] as List? ?? []) : decoded as List;
     return data.cast<Map<String, dynamic>>();
   }
 
