@@ -16,6 +16,8 @@ services:
         fromDatabase:
           name: voz-contra-o-fogo-db
           property: connectionString
+      - key: DJANGO_SETTINGS_MODULE
+        value: "semiaridofogo.settings"
       - key: PYTHON_VERSION
         value: "3.11.0"
 
