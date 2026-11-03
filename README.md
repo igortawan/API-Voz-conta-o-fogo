@@ -170,7 +170,14 @@ Eixos de inovação atendidos: **Regra de negócio** (score automático + detec�
 
 ## Uso de IA no desenvolvimento
 
-Durante o desenvolvimento deste projeto, utilizamos **Inteligência Artificial como ferramenta de orientação técnica** — auxílio em decisões de arquitetura, explicação de conceitos, revisão de abordagens e sugestão de passos a seguir. A escrita do código, as decisões de negócio e a lógica da aplicação foram realizadas pela equipe de desenvolvimento. A IA não gerou o código de forma autônoma.
+| O que a IA gerou | Ferramenta | Observação |
+|---|---|---|
+| Este README | Claude (Anthropic) | Estrutura, conteúdo e formatação |
+| Testes automatizados (`tests/test_api.py`) | Claude (Anthropic) | 15 casos de teste — revisados e validados pela equipe |
+
+A equipe utilizou a IA também como **ferramenta de orientação técnica** em decisões de arquitetura, revisão de abordagens e explicação de conceitos. A lógica de negócio (score de prioridade, detecção de duplicatas, controle de papéis) e as decisões de produto foram definidas pela equipe de desenvolvimento.
+
+> **Transparência acadêmica:** este projeto integra pesquisa de Iniciação Científica (FAPEPI/IFPI). O uso de IA foi declarado ao orientador e está documentado conforme exigência da atividade curricular.
 
 ---
 
