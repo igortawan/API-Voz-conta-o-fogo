@@ -90,6 +90,13 @@ class _AuthorityPageState extends ConsumerState<AuthorityPage>
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: _buildAppBar(unread),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: const Color(0xFFE65100),
+        heroTag: 'alert_fab',
+        icon: const Icon(Icons.campaign_rounded, color: Colors.white),
+        label: const Text('Emitir Alerta', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        onPressed: _showAlertSheet,
+      ),
       body: reportsAsync.when(
         data: (all) {
           final filtered = _applyFilter(all);
@@ -248,6 +255,19 @@ class _AuthorityPageState extends ConsumerState<AuthorityPage>
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (_) => StatusSheet(report: report),
+    );
+  }
+
+  // ── Bottom sheet de alerta ────────────────────────────────────────────────
+
+  void _showAlertSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => const _AlertSheet(),
     );
   }
 
@@ -886,6 +906,163 @@ class _StatusSheetState extends State<StatusSheet> {
         ],
         ),      // fecha Column
       ),        // fecha SingleChildScrollView
+    );
+  }
+}
+
+// ── Bottom sheet de emissão de alerta ────────────────────────────────────────
+
+/// Modal para a autoridade criar e enviar um alerta a todos os usuários.
+class _AlertSheet extends StatefulWidget {
+  const _AlertSheet();
+
+  @override
+  State<_AlertSheet> createState() => _AlertSheetState();
+}
+
+class _AlertSheetState extends State<_AlertSheet> {
+  final _tituloController = TextEditingController();
+  final _descricaoController = TextEditingController();
+  String _nivelRisco = 'medio';
+  bool _loading = false;
+
+  static const _niveis = [
+    ('baixo',   'Baixo',   Colors.green),
+    ('medio',   'Médio',   AppColors.warning),
+    ('alto',    'Alto',    AppColors.statusSent),
+    ('critico', 'Crítico', AppColors.emergency),
+  ];
+
+  @override
+  void dispose() {
+    _tituloController.dispose();
+    _descricaoController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _enviar() async {
+    final titulo = _tituloController.text.trim();
+    final descricao = _descricaoController.text.trim();
+    if (titulo.isEmpty || descricao.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Preencha título e descrição.')),
+      );
+      return;
+    }
+    setState(() => _loading = true);
+    final ok = await DjangoReportService.createAlert(
+      titulo: titulo,
+      descricao: descricao,
+      nivelRisco: _nivelRisco,
+    );
+    if (!mounted) return;
+    setState(() => _loading = false);
+    if (ok) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Alerta enviado a todos os usuários!')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erro ao enviar alerta. Tente novamente.')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20, 16, 20, MediaQuery.of(context).viewInsets.bottom + 24),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Row(
+              children: [
+                Icon(Icons.campaign_rounded, color: Color(0xFFE65100), size: 22),
+                SizedBox(width: 8),
+                Text('Emitir Alerta', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            const SizedBox(height: 4),
+            const Text('O alerta será enviado por push notification a todos os usuários.',
+                style: TextStyle(fontSize: 12, color: AppColors.textLight)),
+            const SizedBox(height: 16),
+            // ── Nível de risco ───────────────────────────────────────────
+            const Text('Nível de risco', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: _niveis.map((n) {
+                final active = _nivelRisco == n.$1;
+                return ChoiceChip(
+                  label: Text(n.$2),
+                  selected: active,
+                  selectedColor: (n.$3 as Color).withValues(alpha: 0.2),
+                  onSelected: (_) => setState(() => _nivelRisco = n.$1),
+                  labelStyle: TextStyle(
+                    color: active ? (n.$3 as Color) : AppColors.textMedium,
+                    fontWeight: active ? FontWeight.bold : FontWeight.normal,
+                  ),
+                  side: BorderSide(color: active ? (n.$3 as Color) : Colors.grey.shade300),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 14),
+            // ── Título ───────────────────────────────────────────────────
+            const Text('Título', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+            const SizedBox(height: 6),
+            TextField(
+              controller: _tituloController,
+              decoration: InputDecoration(
+                hintText: 'Ex: Alerta de incêndio na Serra da Capivara',
+                hintStyle: const TextStyle(fontSize: 12),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                contentPadding: const EdgeInsets.all(12),
+              ),
+            ),
+            const SizedBox(height: 12),
+            // ── Descrição ────────────────────────────────────────────────
+            const Text('Descrição', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+            const SizedBox(height: 6),
+            TextField(
+              controller: _descricaoController,
+              maxLines: 3,
+              decoration: InputDecoration(
+                hintText: 'Detalhe o alerta: localização, orientações, precauções...',
+                hintStyle: const TextStyle(fontSize: 12),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                contentPadding: const EdgeInsets.all(12),
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _loading ? null : _enviar,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFE65100),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                icon: _loading
+                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : const Icon(Icons.send_rounded, color: Colors.white, size: 18),
+                label: Text(_loading ? 'Enviando...' : 'Enviar Alerta',
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

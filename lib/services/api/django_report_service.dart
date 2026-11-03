@@ -111,6 +111,26 @@ class DjangoReportService {
     }
   }
 
+  // ── Cria alerta para todos os usuários (autoridade) ────────────────────────
+
+  static Future<bool> createAlert({
+    required String titulo,
+    required String descricao,
+    required String nivelRisco,
+  }) async {
+    try {
+      final headers = await AuthApiService.authHeaders;
+      final res = await http.post(
+        Uri.parse('$_base/alertas/'),
+        headers: headers,
+        body: jsonEncode({'titulo': titulo, 'descricao': descricao, 'nivel_risco': nivelRisco}),
+      ).timeout(const Duration(seconds: 15));
+      return res.statusCode == 201;
+    } catch (_) {
+      return false;
+    }
+  }
+
   // ── Upload de imagem via Cloudinary (inalterado) ────────────────────────────
 
   static Future<List<String>> uploadImages(List<File> images, String reportId) async {
