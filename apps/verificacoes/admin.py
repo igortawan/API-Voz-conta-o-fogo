@@ -3,6 +3,6 @@ from .models import Verificacao
 
 @admin.register(Verificacao)
 class VerificacaoAdmin(admin.ModelAdmin):
-    list_display = ('ocorrencia', 'verificado_por', 'confirmado', 'created_at')
-    list_filter = ('confirmado',)
+    list_display = ('ocorrencia', 'autoridade', 'resultado', 'created_at')
+    search_fields = ('resultado', 'observacoes')
     ordering = ('-created_at',)
