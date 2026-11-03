@@ -22,6 +22,7 @@ class Command(BaseCommand):
         user.set_password(password)
         user.is_staff = True
         user.is_superuser = True
+        user.role = 'autoridade'
         user.save()
-        action = 'criado' if created else 'senha atualizada'
+        action = 'criado' if created else 'atualizado'
         self.stdout.write(self.style.SUCCESS(f'Admin {email} — {action} com sucesso.'))
