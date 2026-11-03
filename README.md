@@ -174,6 +174,7 @@ Eixos de inovação atendidos: **Regra de negócio** (score automático + detec�
 |---|---|---|
 | Este README | Claude (Anthropic) | Estrutura, conteúdo e formatação |
 | Testes automatizados (`tests/test_api.py`) | Claude (Anthropic) | 15 casos de teste — revisados e validados pela equipe |
+| Deploy no Render (produção) | Claude (Anthropic) | Configuração do `render.yaml`, correção de ordem de imports no `asgi.py`, integração com WhiteNoise e banco PostgreSQL na nuvem |
 
 A equipe utilizou a IA também como **ferramenta de orientação técnica** em decisões de arquitetura, revisão de abordagens e explicação de conceitos. A lógica de negócio (score de prioridade, detecção de duplicatas, controle de papéis) e as decisões de produto foram definidas pela equipe de desenvolvimento.
 
