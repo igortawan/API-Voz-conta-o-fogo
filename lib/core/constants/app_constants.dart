@@ -12,9 +12,9 @@
 
 class AppConstants {
   // ── API Django (backend principal) ─────────────────────────────────────────
-  // Em desenvolvimento: use o IP local da sua máquina (10.0.2.2 = emulador).
-  // Em produção: troque pela URL do Railway/servidor.
-  static const String apiBaseUrl = 'http://10.0.2.2:8000/api';
+  // Produção (Railway): cole aqui a URL gerada após o deploy.
+  // Formato: 'https://NOME-DO-SERVICO.up.railway.app/api'
+  static const String apiBaseUrl = 'https://voz-contra-o-fogo-api.onrender.com/api';
 
   // ── Identidade do app ───────────────────────────────────────────────────────
 
