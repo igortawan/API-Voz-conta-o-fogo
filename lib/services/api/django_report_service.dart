@@ -132,18 +132,16 @@ class DjangoReportService {
   // ── Lista alertas emitidos (autoridade vê todos; demais veem apenas vigentes) ─
 
   static Future<List<Map<String, dynamic>>> getAlerts() async {
-    try {
-      final headers = await AuthApiService.authHeaders;
-      final res = await http.get(
-        Uri.parse('$_base/alertas/'),
-        headers: headers,
-      ).timeout(const Duration(seconds: 15));
-      if (res.statusCode != 200) return [];
-      final List data = jsonDecode(utf8.decode(res.bodyBytes));
-      return data.cast<Map<String, dynamic>>();
-    } catch (_) {
-      return [];
+    final headers = await AuthApiService.authHeaders;
+    final res = await http.get(
+      Uri.parse('$_base/alertas/'),
+      headers: headers,
+    ).timeout(const Duration(seconds: 30));
+    if (res.statusCode != 200) {
+      throw Exception('Erro ${res.statusCode} ao carregar alertas');
     }
+    final List data = jsonDecode(utf8.decode(res.bodyBytes));
+    return data.cast<Map<String, dynamic>>();
   }
 
   // ── Upload de imagem via Cloudinary (inalterado) ────────────────────────────
