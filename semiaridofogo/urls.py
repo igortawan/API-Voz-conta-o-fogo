@@ -1,6 +1,10 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.http import JsonResponse
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
+
+def health(request):
+    return JsonResponse({"status": "ok"})
 
 # Rotas versionadas (v1) — padrão para avaliação e novos clientes
 v1_patterns = [
@@ -12,6 +16,7 @@ v1_patterns = [
 ]
 
 urlpatterns = [
+    path('api/v1/health/', health, name='health'),
     path('admin/', admin.site.urls),
     # OpenAPI / Swagger
     path('api/v1/schema/', SpectacularAPIView.as_view(), name='schema'),
