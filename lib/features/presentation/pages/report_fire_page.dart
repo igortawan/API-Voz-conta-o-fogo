@@ -292,12 +292,11 @@ class _ReportFirePageState extends ConsumerState<ReportFirePage> {
       titulo: titulo,
     );
 
-    // is_duplicate: true e confiança ≥ 0.7 → aviso, não bloqueio
+    // is_duplicate: true → aviso de local com múltiplas denúncias, não bloqueio
     final isDup = duplicata?['is_duplicate'] as bool? ?? false;
-    final confianca = (duplicata?['confianca'] as num?)?.toDouble() ?? 0.0;
-    if (isDup && confianca >= 0.7) {
+    final total = (duplicata?['total_denuncias_proximas'] as num?)?.toInt() ?? 0;
+    if (isDup) {
       if (!mounted) return;
-      final pct = (confianca * 100).toStringAsFixed(0);
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -305,13 +304,15 @@ class _ReportFirePageState extends ConsumerState<ReportFirePage> {
             children: [
               Icon(Icons.warning_amber_rounded, color: AppColors.warning),
               SizedBox(width: 8),
-              Text('Possível Duplicata'),
+              Text('Local com Múltiplas Denúncias'),
             ],
           ),
           content: Text(
-            'Encontramos uma denúncia semelhante nas últimas 24 horas a menos '
-            'de 500 metros daqui ($pct% de similaridade).\n\n'
-            'Deseja enviar mesmo assim?',
+            'Já ${total == 1 ? 'existe 1 denúncia' : 'existem $total denúncias'} '
+            'nas últimas 24 horas a menos de 500 metros daqui.\n\n'
+            'Sua denúncia será enviada e ajudará a autoridade a identificar '
+            'pontos críticos com maior urgência.\n\n'
+            'Deseja confirmar o envio?',
           ),
           actions: [
             TextButton(
@@ -320,7 +321,7 @@ class _ReportFirePageState extends ConsumerState<ReportFirePage> {
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Enviar assim mesmo'),
+              child: const Text('Confirmar Envio'),
             ),
           ],
         ),
