@@ -138,6 +138,21 @@ Future<void> _initNotifications() async {
       AndroidInitializationSettings('@mipmap/ic_launcher');
   const initSettings = InitializationSettings(android: androidSettings);
   await flutterLocalNotificationsPlugin.initialize(initSettings);
+
+  // Cria o canal com som e vibração habilitados (Android 8+).
+  // Se o canal já existir, o Android ignora a chamada sem erro.
+  const channel = AndroidNotificationChannel(
+    'voz_contra_fogo_channel',
+    'Voz Contra o Fogo',
+    description: 'Notificações de denúncias e alertas de incêndio',
+    importance: Importance.max,
+    playSound: true,
+    enableVibration: true,
+  );
+  await flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()
+      ?.createNotificationChannel(channel);
 }
 
 // ── Widget raiz do aplicativo ────────────────────────────────────────────────
