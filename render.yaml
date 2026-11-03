@@ -3,7 +3,7 @@ services:
     name: voz-contra-o-fogo-api
     runtime: python
     buildCommand: pip install -r requirements.txt
-    startCommand: python manage.py migrate && python manage.py collectstatic --noinput && daphne -b 0.0.0.0 -p $PORT semiaridofogo.asgi:application
+    startCommand: python manage.py migrate && python manage.py collectstatic --noinput && python manage.py create_admin && daphne -b 0.0.0.0 -p $PORT semiaridofogo.asgi:application
     plan: free
     envVars:
       - key: SECRET_KEY
@@ -20,6 +20,10 @@ services:
         value: "semiaridofogo.settings"
       - key: PYTHON_VERSION
         value: "3.11.0"
+      - key: ADMIN_EMAIL
+        value: "admin@vozcontrafogo.com"
+      - key: ADMIN_PASSWORD
+        generateValue: true
 
 databases:
   - name: voz-contra-o-fogo-db
