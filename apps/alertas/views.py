@@ -35,10 +35,11 @@ class AlertaListCreateView(generics.ListCreateAPIView):
         )
         # Broadcast WebSocket
         channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            'all_users',
-            {'type': 'novo_alerta', 'alerta': AlertaSerializer(alerta).data}
-        )
+        if channel_layer is not None:
+            async_to_sync(channel_layer.group_send)(
+                'all_users',
+                {'type': 'novo_alerta', 'alerta': AlertaSerializer(alerta).data}
+            )
 
 
 class AlertaDetailView(generics.RetrieveUpdateDestroyAPIView):
