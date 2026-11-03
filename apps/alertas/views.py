@@ -12,8 +12,13 @@ class IsAuthoridade(permissions.BasePermission):
 
 
 class AlertaListCreateView(generics.ListCreateAPIView):
-    queryset = Alerta.objects.filter(vigente=True)
     serializer_class = AlertaSerializer
+
+    def get_queryset(self):
+        # Autoridade vê todos os alertas (histórico); demais veem apenas os ativos
+        if hasattr(self.request.user, 'role') and self.request.user.role == 'autoridade':
+            return Alerta.objects.all().order_by('-created_at')
+        return Alerta.objects.filter(vigente=True).order_by('-created_at')
 
     def get_permissions(self):
         if self.request.method == 'POST':

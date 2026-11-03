@@ -30,19 +30,11 @@ def enviar_para_autoridades(titulo: str, corpo: str, data: dict = None):
 
 
 def enviar_para_todos(titulo: str, corpo: str, data: dict = None):
-    """Envia push para todos os usuários (alertas de risco)."""
-    from apps.accounts.models import Usuario
-    tokens = list(
-        Usuario.objects.filter(is_active=True)
-        .exclude(fcm_token='')
-        .values_list('fcm_token', flat=True)
-    )
-    if not tokens:
-        return
+    """Envia push para todos os usuários via FCM topic (inclui usuários anônimos)."""
     push = _get_pusher()
     if push:
-        push.notify_multiple_devices(
-            registration_ids=tokens,
+        push.notify_topic_subscribers(
+            topic_name='alertas_todos',
             message_title=titulo,
             message_body=corpo,
             data_message=data or {},
