@@ -120,3 +120,19 @@ Por outro lado, o modelo pressupõe que os requisitos estarão completos antes d
 Outro ponto relevante é que o Modelo V não aborda explicitamente testes não funcionais (desempenho, segurança, usabilidade). No projeto, o requisito de resposta < 200 ms sob carga e a segurança via JWT precisaram ser tratados fora da estrutura formal do V.
 
 Por fim, o modelo favorece **planejamento antecipado** de critérios de aceitação, o que melhorou significativamente a comunicação com o orientador: ao apresentar os casos de aceitação AT-01 e AT-02 antes de codificar, a equipe alinhou expectativas e evitou retrabalho. Essa prática de "acceptance-first" aproxima o Modelo V do BDD (Behavior-Driven Development) e é a maior lição extraída desta etapa.
+
+---
+
+## 5. Defeito que o Teste de Unidade Não Encontraria
+
+> **Questão:** Que defeito o teste de unidade não conseguiria encontrar e que apenas um nível mais alto detectaria? Dê um exemplo concreto desta API.
+
+**Defeito:** `score_prioridade` calculado corretamente mas não persistido no banco.
+
+**Explicação:** A função `calcular_score()` (`apps/ocorrencias/services.py`) pode ser testada de forma isolada (teste de unidade) e retornar o valor correto para qualquer combinação de entradas. Um teste unitário validaria, por exemplo, que `calcular_score(nivel_fogo='critico', ha_fumaca=True, proximo_residencia=True)` retorna `score >= 90` — e esse teste passaria.
+
+No entanto, se o método `perform_create()` em `OcorrenciaListCreateView` fosse alterado de forma a **não passar `score_prioridade=score_data['score']` ao `serializer.save()`** — seja por omissão do argumento ou por um erro de indentação — o score nunca seria gravado no banco, e todas as ocorrências teriam `score_prioridade=0`. O teste unitário de `calcular_score` continuaria passando porque ele testa a função pura isolada.
+
+**Quem detectaria:** apenas o **teste de integração IT-01** (`test_create_ocorrencia_returns_201`), que verifica `response.data['score_prioridade'] > 0` após o POST completo, exercitando a cadeia View → Serializer → Model → Banco.
+
+**Por que é relevante para o projeto:** o `score_prioridade` é o critério usado pelas autoridades para priorizar o atendimento. Um score sempre zerado faria com que as denúncias mais graves não fossem destacadas, comprometendo o objetivo central do Voz Contra o Fogo — e isso nunca seria detectado sem um teste que atravessasse pelo menos a camada View + Model juntas.
