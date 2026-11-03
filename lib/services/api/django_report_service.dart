@@ -12,19 +12,17 @@ class DjangoReportService {
   // ── Lista denúncias do usuário ───────────────────────────────────────────────
 
   static Future<List<ReportModel>> getUserReports() async {
-    try {
-      final headers = await AuthApiService.authHeaders;
-      final res = await http.get(
-        Uri.parse('$_base/ocorrencias/'),
-        headers: headers,
-      ).timeout(const Duration(seconds: 15));
+    final headers = await AuthApiService.authHeaders;
+    final res = await http.get(
+      Uri.parse('$_base/ocorrencias/'),
+      headers: headers,
+    ).timeout(const Duration(seconds: 30));
 
-      if (res.statusCode != 200) return [];
-      final List data = jsonDecode(utf8.decode(res.bodyBytes));
-      return data.map((m) => ReportModel.fromDjangoMap(m as Map<String, dynamic>)).toList();
-    } catch (_) {
-      return [];
+    if (res.statusCode != 200) {
+      throw Exception('Erro ${res.statusCode} ao carregar denúncias');
     }
+    final List data = jsonDecode(utf8.decode(res.bodyBytes));
+    return data.map((m) => ReportModel.fromDjangoMap(m as Map<String, dynamic>)).toList();
   }
 
   // ── Cria denúncia ────────────────────────────────────────────────────────────
@@ -128,6 +126,23 @@ class DjangoReportService {
       return res.statusCode == 201;
     } catch (_) {
       return false;
+    }
+  }
+
+  // ── Lista alertas emitidos (autoridade vê todos; demais veem apenas vigentes) ─
+
+  static Future<List<Map<String, dynamic>>> getAlerts() async {
+    try {
+      final headers = await AuthApiService.authHeaders;
+      final res = await http.get(
+        Uri.parse('$_base/alertas/'),
+        headers: headers,
+      ).timeout(const Duration(seconds: 15));
+      if (res.statusCode != 200) return [];
+      final List data = jsonDecode(utf8.decode(res.bodyBytes));
+      return data.cast<Map<String, dynamic>>();
+    } catch (_) {
+      return [];
     }
   }
 

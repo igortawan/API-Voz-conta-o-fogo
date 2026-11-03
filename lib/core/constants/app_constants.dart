@@ -57,6 +57,7 @@ class AppConstants {
   // de novas denúncias. A credencial OAuth2 fica em firebase_service_account.dart.
 
   static const String fcmAuthorityTopic = 'authority_alerts';
+  static const String fcmAllUsersTopic  = 'alertas_todos';
 
   // ── WorkManager — Sincronização em background ────────────────────────────────
   // Nome e tag da tarefa periódica que sincroniza denúncias offline a cada 15min.

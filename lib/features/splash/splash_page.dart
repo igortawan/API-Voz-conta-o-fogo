@@ -49,6 +49,8 @@ class _SplashPageState extends ConsumerState<SplashPage>
 
     try {
       await FcmService.init();
+      // Todos os dispositivos (incluindo anônimos) recebem alertas de emergência
+      await FcmService.subscribeToTopic(AppConstants.fcmAllUsersTopic);
     } catch (_) {}
 
     // Tenta restaurar sessão JWT existente

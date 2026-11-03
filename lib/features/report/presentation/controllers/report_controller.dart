@@ -29,11 +29,19 @@ final userReportsProvider = StreamProvider<List<ReportModel>>((ref) async* {
   }
 
   // Carga inicial
-  yield await DjangoReportService.getUserReports();
+  try {
+    yield await DjangoReportService.getUserReports();
+  } catch (_) {
+    yield [];
+  }
 
   // Re-emite sempre que o WebSocket notificar uma nova ocorrência/atualização
   await for (final _ in WebSocketService.onNewReport) {
-    yield await DjangoReportService.getUserReports();
+    try {
+      yield await DjangoReportService.getUserReports();
+    } catch (_) {
+      yield [];
+    }
   }
 });
 

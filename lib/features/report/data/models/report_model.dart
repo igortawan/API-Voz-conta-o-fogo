@@ -10,6 +10,7 @@
 // Os controllers e widgets trabalham com [ReportModel] diretamente.
 // ============================================================================
 
+import '../../../../core/constants/app_constants.dart';
 import '../../domain/entities/report_entity.dart';
 
 class ReportModel extends ReportEntity {
@@ -73,10 +74,12 @@ class ReportModel extends ReportEntity {
   /// Cria um [ReportModel] a partir da resposta JSON do backend Django.
   /// Os nomes de campo do Django (snake_case) são mapeados para o padrão Flutter.
   factory ReportModel.fromDjangoMap(Map<String, dynamic> map) {
-    // Mapeia nivel_fogo do Django para fireLevel do Flutter
+    // Mapeia nivel_fogo do Django para o valor de AppConstants correspondente
     const nivelMap = {
-      'baixo': 'fireLevelSmall', 'medio': 'fireLevelMedium',
-      'alto': 'fireLevelNearHome', 'critico': 'fireLevelUrgent',
+      'baixo':   AppConstants.fireLevelSmall,
+      'medio':   AppConstants.fireLevelMedium,
+      'alto':    AppConstants.fireLevelNearHome,
+      'critico': AppConstants.fireLevelUrgent,
     };
     return ReportModel(
       id: map['id']?.toString() ?? '',
@@ -88,16 +91,16 @@ class ReportModel extends ReportEntity {
       longitude: double.tryParse(map['longitude']?.toString() ?? '0') ?? 0.0,
       address: map['endereco'] as String?,
       description: map['descricao'] as String? ?? '',
-      fireLevel: nivelMap[map['nivel_fogo']] ?? 'fireLevelSmall',
+      fireLevel: nivelMap[map['nivel_fogo']] ?? AppConstants.fireLevelSmall,
       smokeLevel: map['nivel_fumaca'] as String? ?? '',
       riskLevel: map['nivel_risco'] as String? ?? '',
-      images: List<String>.from(map['imagens'] ?? []),
+      images: (map['imagens'] as List?)?.map((e) => e.toString()).toList() ?? [],
       localImages: const [],
       status: map['status'] as String? ?? 'pendente',
       offlineCreated: false,
       synced: true,
       observations: map['observacoes'] as String?,
-      score: (map['score'] as num?)?.toInt(),
+      score: (map['score_prioridade'] as num?)?.toInt(),
     );
   }
 

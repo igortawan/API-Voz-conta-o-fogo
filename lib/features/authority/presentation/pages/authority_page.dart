@@ -42,6 +42,7 @@ import '../../../admin/presentation/controllers/admin_controller.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../presentation/pages/auth/login.page.dart';
 import '../../../report/data/models/report_model.dart';
+import 'authority_alerts_history_page.dart';
 import 'authority_notifications_page.dart';
 import 'authority_stats_page.dart';
 import 'report_detail_page.dart';
@@ -72,7 +73,7 @@ class _AuthorityPageState extends ConsumerState<AuthorityPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     FcmService.subscribeToTopic(AppConstants.fcmAuthorityTopic);
   }
 
@@ -97,33 +98,34 @@ class _AuthorityPageState extends ConsumerState<AuthorityPage>
         label: const Text('Emitir Alerta', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         onPressed: _showAlertSheet,
       ),
-      body: reportsAsync.when(
-        data: (all) {
-          final filtered = _applyFilter(all);
-          return Column(
-            children: [
-              // ── TabBar: Denúncias | Estatísticas ──────────────────────
-              Container(
-                color: Colors.white,
-                child: TabBar(
-                  controller: _tabController,
-                  labelColor: AppColors.primary,
-                  unselectedLabelColor: AppColors.textLight,
-                  indicatorColor: AppColors.primary,
-                  tabs: const [
-                    Tab(icon: Icon(Icons.list_alt_rounded), text: 'Denúncias'),
-                    Tab(icon: Icon(Icons.bar_chart_rounded), text: 'Estatísticas'),
-                  ],
-                ),
-              ),
+      body: Column(
+        children: [
+          // ── TabBar: Denúncias | Estatísticas | Alertas ────────────────
+          Container(
+            color: Colors.white,
+            child: TabBar(
+              controller: _tabController,
+              labelColor: AppColors.primary,
+              unselectedLabelColor: AppColors.textLight,
+              indicatorColor: AppColors.primary,
+              tabs: const [
+                Tab(icon: Icon(Icons.list_alt_rounded), text: 'Denúncias'),
+                Tab(icon: Icon(Icons.bar_chart_rounded), text: 'Estatísticas'),
+                Tab(icon: Icon(Icons.campaign_rounded), text: 'Alertas'),
+              ],
+            ),
+          ),
 
-              // ── Conteúdo das abas ────────────────────────────────────
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    // Aba 0 — Lista de denúncias
-                    Column(
+          // ── Conteúdo das abas ──────────────────────────────────────────
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                // Aba 0 — Lista de denúncias
+                reportsAsync.when(
+                  data: (all) {
+                    final filtered = _applyFilter(all);
+                    return Column(
                       children: [
                         _SummaryBar(reports: all),
                         _FilterRow(
@@ -131,40 +133,84 @@ class _AuthorityPageState extends ConsumerState<AuthorityPage>
                           onChanged: (f) => setState(() => _filter = f),
                         ),
                         Expanded(
-                          child: filtered.isEmpty
-                              ? const _EmptyState()
-                              : ListView.separated(
-                                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-                                  itemCount: filtered.length,
-                                  separatorBuilder: (_, __) =>
-                                      const SizedBox(height: 12),
-                                  itemBuilder: (_, i) => ReportCard(
-                                    report: filtered[i],
-                                    onTap: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) =>
-                                            ReportDetailPage(report: filtered[i]),
+                          child: RefreshIndicator(
+                            onRefresh: () async =>
+                                ref.invalidate(allReportsProvider),
+                            child: filtered.isEmpty
+                                ? ListView(
+                                    physics:
+                                        const AlwaysScrollableScrollPhysics(),
+                                    children: [
+                                      _EmptyState(
+                                        onRetry: () => ref
+                                            .invalidate(allReportsProvider),
                                       ),
+                                    ],
+                                  )
+                                : ListView.separated(
+                                    physics:
+                                        const AlwaysScrollableScrollPhysics(),
+                                    padding: const EdgeInsets.fromLTRB(
+                                        16, 8, 16, 32),
+                                    itemCount: filtered.length,
+                                    separatorBuilder: (_, __) =>
+                                        const SizedBox(height: 12),
+                                    itemBuilder: (_, i) => ReportCard(
+                                      report: filtered[i],
+                                      onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => ReportDetailPage(
+                                              report: filtered[i]),
+                                        ),
+                                      ),
+                                      onChangeStatus: () =>
+                                          _showStatusSheet(filtered[i]),
                                     ),
-                                    onChangeStatus: () =>
-                                        _showStatusSheet(filtered[i]),
                                   ),
-                                ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (e, _) => Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.error_outline,
+                            size: 48, color: AppColors.textLight),
+                        const SizedBox(height: 12),
+                        const Text('Erro ao carregar denúncias',
+                            style:
+                                TextStyle(color: AppColors.textMedium)),
+                        const SizedBox(height: 8),
+                        TextButton.icon(
+                          onPressed: () =>
+                              ref.invalidate(allReportsProvider),
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Tentar novamente'),
                         ),
                       ],
                     ),
-
-                    // Aba 1 — Estatísticas
-                    AuthorityStatsPage(reports: all),
-                  ],
+                  ),
                 ),
-              ),
-            ],
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Erro: $e')),
+
+                // Aba 1 — Estatísticas
+                reportsAsync.when(
+                  data: (all) => AuthorityStatsPage(reports: all),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (_, __) => const SizedBox.shrink(),
+                ),
+
+                // Aba 2 — Histórico de alertas
+                const AuthorityAlertsHistoryPage(),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1071,24 +1117,36 @@ class _AlertSheetState extends State<_AlertSheet> {
 
 /// Exibido quando nenhuma denúncia corresponde ao filtro selecionado.
 class _EmptyState extends StatelessWidget {
-  const _EmptyState();
+  final VoidCallback? onRetry;
+  const _EmptyState({this.onRetry});
 
   @override
   Widget build(BuildContext context) => Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.inbox_outlined,
-                size: 72, color: Colors.grey.shade300),
-            const SizedBox(height: 14),
-            const Text(
-              'Nenhuma denúncia encontrada.',
-              style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textLight),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.only(top: 80),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.inbox_outlined,
+                  size: 72, color: Colors.grey.shade300),
+              const SizedBox(height: 14),
+              const Text(
+                'Nenhuma denúncia encontrada.',
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textLight),
+              ),
+              if (onRetry != null) ...[
+                const SizedBox(height: 12),
+                TextButton.icon(
+                  onPressed: onRetry,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Atualizar'),
+                ),
+              ],
+            ],
+          ),
         ),
       );
 }
