@@ -5,15 +5,22 @@ from django.utils import timezone
 
 # ── Score de prioridade ───────────────────────────────────────────────────────
 
-SCORE_RULES = {
+SCORE_NIVEL_FOGO = {
     'critico': 40, 'alto': 25, 'medio': 12, 'baixo': 5,
 }
 
+SCORE_NIVEL_FUMACA = {
+    'Alta': 15, 'Média': 8, 'Baixa': 3,
+}
+
 def calcular_score(nivel_fogo: str, ha_fumaca: bool, proximo_residencia: bool,
-                   latitude: float, longitude: float) -> dict:
-    score = SCORE_RULES.get(nivel_fogo, 5)
-    if ha_fumaca:
-        score += 20
+                   latitude: float, longitude: float,
+                   nivel_fumaca: str = '') -> dict:
+    score = SCORE_NIVEL_FOGO.get(nivel_fogo, 5)
+    if nivel_fumaca:
+        score += SCORE_NIVEL_FUMACA.get(nivel_fumaca, 0)
+    elif ha_fumaca:
+        score += 8
     if proximo_residencia:
         score += 15
     if latitude != 0 and longitude != 0:

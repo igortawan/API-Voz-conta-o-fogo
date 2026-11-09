@@ -55,6 +55,7 @@ class OcorrenciaListCreateView(generics.ListCreateAPIView):
             proximo_residencia=data.get('proximo_residencia', False),
             latitude=float(data.get('latitude', 0)),
             longitude=float(data.get('longitude', 0)),
+            nivel_fumaca=data.get('nivel_fumaca', ''),
         )
 
         # Denúncias anônimas ou de sessões sem conta ficam sem usuário vinculado
@@ -123,7 +124,8 @@ def score_view(request, pk):
         return Response({'detail': 'Não encontrada'}, status=404)
 
     data = calcular_score(oc.nivel_fogo, oc.ha_fumaca, oc.proximo_residencia,
-                          float(oc.latitude), float(oc.longitude))
+                          float(oc.latitude), float(oc.longitude),
+                          nivel_fumaca=oc.nivel_fumaca or '')
     return Response({
         'score': data['score'],
         'nivel_calculado': data['nivel'],
