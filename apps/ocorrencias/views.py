@@ -48,14 +48,22 @@ class OcorrenciaListCreateView(generics.ListCreateAPIView):
         user = self.request.user
         data = self.request.data
 
+        lat = float(data.get('latitude', 0))
+        lon = float(data.get('longitude', 0))
+
+        # Conta denúncias próximas para aumentar o score por corroboração
+        dup_data = detectar_duplicata(lat, lon, titulo='')
+        denuncias_proximas = dup_data['total_denuncias_proximas']
+
         # Score calculado no servidor
         score_data = calcular_score(
             nivel_fogo=data.get('nivel_fogo', 'baixo'),
             ha_fumaca=data.get('ha_fumaca', False),
             proximo_residencia=data.get('proximo_residencia', False),
-            latitude=float(data.get('latitude', 0)),
-            longitude=float(data.get('longitude', 0)),
+            latitude=lat,
+            longitude=lon,
             nivel_fumaca=data.get('nivel_fumaca', ''),
+            denuncias_proximas=denuncias_proximas,
         )
 
         # Denúncias anônimas ou de sessões sem conta ficam sem usuário vinculado

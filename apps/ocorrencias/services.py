@@ -15,7 +15,7 @@ SCORE_NIVEL_FUMACA = {
 
 def calcular_score(nivel_fogo: str, ha_fumaca: bool, proximo_residencia: bool,
                    latitude: float, longitude: float,
-                   nivel_fumaca: str = '') -> dict:
+                   nivel_fumaca: str = '', denuncias_proximas: int = 0) -> dict:
     score = SCORE_NIVEL_FOGO.get(nivel_fogo, 5)
     if nivel_fumaca:
         score += SCORE_NIVEL_FUMACA.get(nivel_fumaca, 0)
@@ -25,6 +25,13 @@ def calcular_score(nivel_fogo: str, ha_fumaca: bool, proximo_residencia: bool,
         score += 15
     if latitude != 0 and longitude != 0:
         score += 10
+    # Múltiplas denúncias do mesmo foco aumentam a credibilidade
+    if denuncias_proximas == 1:
+        score += 5
+    elif denuncias_proximas == 2:
+        score += 10
+    elif denuncias_proximas >= 3:
+        score += 15
     score = min(score, 100)
 
     if score >= 80:
